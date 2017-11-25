@@ -1,17 +1,12 @@
-import Variables.Colours;
-import Variables.Variable;
-
-public class Cell {
-    private Variable data;
+public abstract class Cell {
     private Cell next;
     private Cell prev;
-    private Colours colour;
+    private Colour colour;
 
-    public Cell(Variable data) {
-        this.data = data;
+    public Cell() {
         this.next = null;
         this.prev = null;
-        this.colour = Colours.BLACK;
+        this.colour = Colour.BLACK;
     }
 
     public void setNext(Cell next) {
@@ -22,6 +17,8 @@ public class Cell {
         this.prev = prev;
     }
 
+    public void setColour(Colour coulour) { this.colour = colour; }
+
     public Cell getNext() {
         return next;
     }
@@ -30,5 +27,7 @@ public class Cell {
         return prev;
     }
 
-
+    public Colour getColour() {
+        return colour;
+    }
 }

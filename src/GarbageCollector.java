@@ -1,8 +1,12 @@
-import Variables.Variable;
 
 public abstract class GarbageCollector {
+    protected Heap heap;
 
-    public abstract Cell allocate(Variable var);
+    public GarbageCollector() {
+        heap = new Heap();
+    }
 
-    public abstract void free(Variable var);
+    public abstract Cell allocate();
+
+    public abstract void free(Cell cell);
 }

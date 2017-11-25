@@ -1,18 +1,10 @@
-import Variables.Variable;
-
 public class Heap {
-    private GarbageCollector collector;
 
-    public Heap(GarbageCollector collector) {
-        this.collector = collector;
+    public Tag allocateTag() {
+        return new Tag();
     }
 
-    public Cell allocate(Variable var) {
-        return collector.allocate(var);
+    public Cell allocateInt() {
+        return new Integer(2);
     }
-
-    public void free(Variable var) {
-        collector.free(var);
-    }
-
 }
