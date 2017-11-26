@@ -1,3 +1,4 @@
+package GarbageCollector;
 
 public abstract class GarbageCollector {
     protected Heap heap;
@@ -6,7 +7,7 @@ public abstract class GarbageCollector {
         heap = new Heap();
     }
 
-    public abstract Cell allocate();
+    public abstract Tag allocate();
 
     public abstract void free(Cell cell);
 }

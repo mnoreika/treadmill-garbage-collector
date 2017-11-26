@@ -1,3 +1,5 @@
+package GarbageCollector;
+
 public class Tag extends Cell {
     private DataType type;
     private Cell pointer;

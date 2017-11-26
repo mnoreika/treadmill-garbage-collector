@@ -1,11 +1,13 @@
+package GarbageCollector;
+
 import java.util.ArrayList;
 
 public class Threadmill extends GarbageCollector {
-    private Cell bottom;
-    private Cell top;
-    private Cell scan;
-    private Cell free;
-    private ArrayList<Cell> scope;
+    protected Cell bottom;
+    protected Cell top;
+    protected Cell scan;
+    protected Cell free;
+    protected ArrayList<Cell> scope;
 
     public Threadmill() {
         super();
@@ -19,14 +21,14 @@ public class Threadmill extends GarbageCollector {
     }
 
     @Override
-    public Cell allocate() {
-        Cell allocatedCell = null;
+    public Tag allocate() {
+        Tag allocatedCell = null;
 
         if (free == bottom) {
-            flipCells();
+//            flipCells();
 
             Tag tag = heap.allocateTag();
-            Cell data = heap.allocateInt();
+            Data data = heap.allocateInt();
 
              /* First allocation */
             if (scan == null) {
@@ -45,10 +47,10 @@ public class Threadmill extends GarbageCollector {
                 scan = tag;
             }
 
-            tag.setPointer(tag);
+            tag.setPointer(data);
             allocatedCell = tag;
         } else {
-            allocatedCell = free;
+            allocatedCell = new Tag();
             free = free.getNext();
 
             if (free == bottom) {

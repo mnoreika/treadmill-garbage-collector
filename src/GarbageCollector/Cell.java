@@ -1,3 +1,5 @@
+package GarbageCollector;
+
 public abstract class Cell {
     private Cell next;
     private Cell prev;
@@ -17,7 +19,7 @@ public abstract class Cell {
         this.prev = prev;
     }
 
-    public void setColour(Colour coulour) { this.colour = colour; }
+    public void setColour(Colour colour) { this.colour = colour; }
 
     public Cell getNext() {
         return next;
