@@ -7,10 +7,10 @@ import GarbageCollector.Tag;
 
 import java.util.ArrayList;
 
-public class Integer extends EpiscopalObject {
-    private int value;
+public class Percentage extends EpiscopalObject {
+    private float value;
 
-    public Integer(int value) {
+    public Percentage(float value) {
         this.value = value;
     }
 
@@ -18,7 +18,7 @@ public class Integer extends EpiscopalObject {
     public ArrayList<Cell> allocate() {
         ArrayList<Cell> blocks = new ArrayList<>();
 
-        Tag tag = new Tag(DataType.INT);
+        Tag tag = new Tag(DataType.PERCENTAGE);
         Data data = new Data(value);
 
         tag.addEntry(data);

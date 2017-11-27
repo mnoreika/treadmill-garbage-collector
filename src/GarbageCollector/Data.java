@@ -1,16 +1,13 @@
 package GarbageCollector;
 
-import GarbageCollector.Cell;
-import GarbageCollector.DataType;
+public class Data extends Cell {
+    private Object data;
 
-import java.util.ArrayList;
-
-public abstract class Data extends Cell {
-    private DataType type;
-
-    public Data() {
+    public Data(Object data) {
         super();
     }
 
-    public abstract ArrayList<Cell> allocate();
+    public Object getData() {
+        return data;
+    }
 }

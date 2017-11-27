@@ -2,14 +2,14 @@ package GarbageCollector;
 
 import java.util.ArrayList;
 
-public class Threadmill extends GarbageCollector {
+public class Treadmill extends GarbageCollector {
     protected Cell bottom;
     protected Cell top;
     protected Cell scan;
     protected Cell free;
     protected ArrayList<Cell> scope;
 
-    public Threadmill() {
+    public Treadmill() {
         super();
 
         bottom = null;
@@ -27,8 +27,8 @@ public class Threadmill extends GarbageCollector {
         if (free == bottom) {
 //            flipCells();
 
-            Tag tag = heap.allocateTag();
-            Data data = heap.allocateInt();
+            Tag tag = null;
+            Data data = null;
 
              /* First allocation */
             if (scan == null) {
@@ -50,7 +50,7 @@ public class Threadmill extends GarbageCollector {
             tag.setPointer(data);
             allocatedCell = tag;
         } else {
-            allocatedCell = new Tag();
+            allocatedCell = new Tag(DataType.INT);
             free = free.getNext();
 
             if (free == bottom) {

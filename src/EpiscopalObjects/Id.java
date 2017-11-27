@@ -1,25 +1,26 @@
 package EpiscopalObjects;
 
 import GarbageCollector.Cell;
-import GarbageCollector.Data;
 import GarbageCollector.DataType;
 import GarbageCollector.Tag;
+import GarbageCollector.Data;
 
 import java.util.ArrayList;
 
-public class Integer extends EpiscopalObject {
-    private int value;
+public class Id extends EpiscopalObject {
+    private int variableIndex;
 
-    public Integer(int value) {
-        this.value = value;
+    public Id(int variableIndex) {
+        this.variableIndex = variableIndex;
     }
+
 
     @Override
     public ArrayList<Cell> allocate() {
         ArrayList<Cell> blocks = new ArrayList<>();
 
-        Tag tag = new Tag(DataType.INT);
-        Data data = new Data(value);
+        Tag tag = new Tag(DataType.ID);
+        Data data = new Data(variableIndex);
 
         tag.addEntry(data);
 

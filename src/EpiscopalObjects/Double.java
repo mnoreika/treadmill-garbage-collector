@@ -7,10 +7,10 @@ import GarbageCollector.Tag;
 
 import java.util.ArrayList;
 
-public class Integer extends EpiscopalObject {
-    private int value;
+public class Double extends EpiscopalObject {
+    private double value;
 
-    public Integer(int value) {
+    public Double(double value) {
         this.value = value;
     }
 
@@ -18,7 +18,7 @@ public class Integer extends EpiscopalObject {
     public ArrayList<Cell> allocate() {
         ArrayList<Cell> blocks = new ArrayList<>();
 
-        Tag tag = new Tag(DataType.INT);
+        Tag tag = new Tag(DataType.DOUBLE);
         Data data = new Data(value);
 
         tag.addEntry(data);

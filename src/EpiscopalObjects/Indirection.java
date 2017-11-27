@@ -7,19 +7,19 @@ import GarbageCollector.Tag;
 
 import java.util.ArrayList;
 
-public class Integer extends EpiscopalObject {
-    private int value;
+public class Indirection extends  EpiscopalObject {
+    private Cell cell;
 
-    public Integer(int value) {
-        this.value = value;
+    public Indirection(Cell cell) {
+        this.cell = cell;
     }
 
     @Override
     public ArrayList<Cell> allocate() {
-        ArrayList<Cell> blocks = new ArrayList<>();
+        ArrayList<Cell> blocks = new ArrayList<Cell>();
 
-        Tag tag = new Tag(DataType.INT);
-        Data data = new Data(value);
+        Tag tag = new Tag(DataType.IND);
+        Data data = new Data(cell);
 
         tag.addEntry(data);
 

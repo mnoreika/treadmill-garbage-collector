@@ -1,20 +1,22 @@
 package GarbageCollector;
 
+import java.util.ArrayList;
+
 public class Tag extends Cell {
     private DataType type;
-    private Cell pointer;
+    private ArrayList<Cell> entries;
 
-    public Tag() {
+    public Tag(DataType type) {
         super();
 
-        type = DataType.INT;
+        this.type = type;
     }
 
-    public void setPointer(Cell cell) {
-        pointer = cell;
+    public void addEntry(Cell cell) {
+        entries.add(cell);
     }
 
-    public Cell getPointer() {
-        return pointer;
+    public ArrayList<Cell> getEntries() {
+        return entries;
     }
 }
