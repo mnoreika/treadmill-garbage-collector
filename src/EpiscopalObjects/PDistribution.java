@@ -35,18 +35,16 @@ public class PDistribution extends EpiscopalObject {
         tag.addEntry(numberOfParameters);
         blocks.add(numberOfParameters);
         for (int i = 0; i < this.numberOfParameters; i++) {
-            Data parameter = new Data(new Indirection(parameters[i]));
+            Data parameter = (Data) ((Tag) parameters[i]).getEntries().get(0);
 
-            blocks.add(parameter);
             tag.addEntry(parameter);
         }
 
         tag.addEntry(numberOfElements);
         blocks.add(numberOfElements);
         for (int i = 0; i < this.numberOfElements; i++) {
-            Data element = new Data(new Indirection(elements[i]));
+            Data element = (Data) ((Tag) elements[i]).getEntries().get(0);
 
-            blocks.add(element);
             tag.addEntry(element);
         }
 

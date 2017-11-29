@@ -19,12 +19,11 @@ public class Indirection extends  EpiscopalObject {
         ArrayList<Cell> blocks = new ArrayList<Cell>();
 
         Tag tag = new Tag(DataType.IND);
-        Data data = new Data(cell);
+        Data data = (Data) ((Tag) cell).getEntries().get(0);
 
-        tag.addEntry(data);
+        tag.addEntry((data));
 
         blocks.add(tag);
-        blocks.add(data);
 
         return blocks;
     }

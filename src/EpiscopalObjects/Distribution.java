@@ -30,9 +30,8 @@ public class Distribution extends EpiscopalObject {
         blocks.add(numberOfElements);
 
         for (int i = 0; i < this.numberOfElements; i++) {
-            Data element = new Data(new Indirection(elements[i]));
+            Data element = (Data) ((Tag) elements[i]).getEntries().get(0);
 
-            blocks.add(element);
             tag.addEntry(element);
         }
 

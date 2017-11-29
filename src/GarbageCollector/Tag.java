@@ -13,6 +13,10 @@ public class Tag extends Cell {
         entries = new ArrayList<Cell>();
     }
 
+    public DataType  getType() {
+        return type;
+    }
+
     public void addEntry(Cell cell) {
         entries.add(cell);
     }

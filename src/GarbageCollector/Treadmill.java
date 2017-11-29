@@ -1,9 +1,6 @@
 package GarbageCollector;
 
 import EpiscopalObjects.EpiscopalObject;
-import EpiscopalObjects.Indirection;
-import com.sun.org.apache.xpath.internal.SourceTree;
-
 import java.util.ArrayList;
 
 public class Treadmill extends GarbageCollector {
@@ -28,7 +25,7 @@ public class Treadmill extends GarbageCollector {
     public Cell allocate(EpiscopalObject object) {
         Cell allocatedTag = null;
 
-        // No drop cells available
+        // No free cells available
         if (free == bottom) {
             ArrayList<Cell> cells = heap.allocateCells(object);
             allocatedTag = cells.get(0);
@@ -38,59 +35,89 @@ public class Treadmill extends GarbageCollector {
 
              /* First allocation */
             if (scan == null) {
-                scan = allocatedTag;
-                top = scan;
-                bottom = scan;
-                free = scan;
-
-                lastCell.setNext(scan);
-                scan.setPrev(lastCell);
+                setUpInitialCells(allocatedTag, lastCell);
             }
             else {
-                free.getPrev().setNext(allocatedTag);
-                allocatedTag.setPrev(free.getPrev());
-                free.setPrev(lastCell);
-                lastCell.setNext(free);
+                addNewCells(allocatedTag, lastCell);
             }
         } else {
-            System.out.println("ALLOCATION!");
-            int objectCellSize = object.getSize();
-            int freeCount = 0;
-            ArrayList<Cell> freeCells = new ArrayList<Cell>();
-            boolean enoughFreeCells = false;
-
-            Cell iterator = free;
-            while (iterator != bottom && freeCount < objectCellSize) {
-                freeCells.add(free);
-                freeCount++;
-
-                if (freeCount == objectCellSize) {
-                    enoughFreeCells = true;
-
-                    // Remove used drop blocks
-                    free.getPrev().setNext(free.getNext());
-                }
-
-                free = free.getNext();
-            }
-
-            ArrayList<Cell> cells = null;
-
-            if (enoughFreeCells) {
-                cells = heap.reuseCells(object, freeCells);
-            } else {
-                cells = heap.allocateCells(object);
-            }
-
-            linkCells(cells);
-
-            allocatedTag.setNext(scan);
-            scan.setPrev(allocatedTag);
-            scan = allocatedTag;
+            ;
+            /* Reallocating free cells */
+            allocatedTag = reallocateFreeCells(object);
         }
 
         scope.add(allocatedTag);
         return allocatedTag;
+    }
+
+    @Override
+    public void drop(Cell cell) {
+        scope.remove(cell);
+    }
+
+
+    private void setUpInitialCells(Cell allocatedTag, Cell lastCell) {
+        scan = allocatedTag;
+        top = scan;
+        bottom = scan;
+        free = scan;
+
+        lastCell.setNext(scan);
+        scan.setPrev(lastCell);
+    }
+
+    private Cell reallocateFreeCells(EpiscopalObject object) {
+        ArrayList<Cell> freeCells = getFreeCells(object);
+        ArrayList<Cell> cells = null;
+
+        if (freeCells != null) {
+            // Remove used drop blocks
+            for (Cell freeCell : freeCells) {
+                takeCellOut(freeCell);
+            }
+
+            cells = heap.reuseCells(object, freeCells);
+        } else {
+            cells = heap.allocateCells(object);
+        }
+
+        for (Cell cell : cells) {
+            moveCellToGrey(cell);
+        }
+
+        return cells.get(0);
+    }
+
+    private ArrayList<Cell> getFreeCells(EpiscopalObject object) {
+        int objectCellSize = object.getSize();
+        int freeCount = 0;
+
+        ArrayList<Cell> freeCells = new ArrayList<Cell>();
+        boolean enoughFreeCells = false;
+
+        Cell iterator = free;
+        while (iterator != bottom && freeCount < objectCellSize) {
+            freeCells.add(free);
+            freeCount++;
+
+            free = free.getNext();
+            if (freeCount == objectCellSize) {
+                enoughFreeCells = true;
+            }
+        }
+
+        if (enoughFreeCells)
+            return freeCells;
+        else
+            return null;
+    }
+
+    private void addNewCells(Cell allocatedTag, Cell lastCell) {
+        free.getPrev().setNext(allocatedTag);
+        allocatedTag.setPrev(free.getPrev());
+        free.setPrev(lastCell);
+        lastCell.setNext(free);
+
     }
 
     private void linkCells(ArrayList<Cell> cells) {
@@ -99,7 +126,11 @@ public class Treadmill extends GarbageCollector {
 
             if (i == 0) {
                 current.setPrev(null);
-                current.setNext(cells.get(i + 1));
+
+                if (cells.size() > 1)
+                    current.setNext(cells.get(i + 1));
+                else
+                    current.setNext(null);
             }
             else if (i == (cells.size() - 1)) {
                 current.setPrev(cells.get(i - 1));
@@ -112,61 +143,20 @@ public class Treadmill extends GarbageCollector {
         }
     }
 
-    @Override
-    public void drop(Cell cell) {
-        scope.remove(cell);
-//        collection();
-    }
-
-    protected void collection() {
-//        flip();
-
-        for (Cell root : scope) {
-            moveCellToGrey(root);
-        }
-
-        printTread();
-        System.out.println("--------------------");
-
-        scan = scan.getPrev();
-
-        while (scan != top) {
-            scanCell(scan);
-            scan = scan.getPrev();
-
-            if (scan == top)
-                scanCell(scan);
-        }
-
-//        flip();
-    }
-
     private void scanCell(Cell cell) {
-        printTread();
         if (cell instanceof Tag) {
             for (Cell children : ((Tag) cell).getEntries()) {
                 if (children.isEcru())
                     moveCellToGrey(children);
             }
         }
-
-//        if (cell instanceof Data) {
-//            Object data = ((Data) cell).getData();
-//
-//            if (data instanceof Cell) {
-//                moveCellToGrey(cell);
-//            }
-//        }
-
-        printTread();
-
     }
 
     private void moveCellToGrey(Cell cell) {
-        takeCellOut(cell);
+        if (cell.getPrev() != null)
+            takeCellOut(cell);
 
-        printTread();
-
+        /* Handle edge case where after move top, bottom and free point to the same cell */
         if (top == bottom && top != scan) {
             bottom = cell;
         }
@@ -181,9 +171,23 @@ public class Treadmill extends GarbageCollector {
         cell.setPrev(top.getPrev());
         top.getPrev().setNext(cell);
         top.setPrev(cell);
+
+        if (bottom != top) {
+            top = cell;
+        }
+    }
+
+    private void moveRoot(Cell cell) {
+        takeCellOut(cell);
+
+        cell.setToNotEcru();
+
+        cell.setNext(top);
+        cell.setPrev(top.getPrev());
+        top.getPrev().setNext(cell);
+        top.setPrev(cell);
+
         top = cell;
-
-
     }
 
     private void takeCellOut(Cell cell) {
@@ -200,6 +204,23 @@ public class Treadmill extends GarbageCollector {
         cell.getNext().setPrev(cell.getPrev());
     }
 
+    protected void collection() {
+        for (Cell root : scope) {
+            moveRoot(root);
+        }
+
+        boolean scanFinished = false;
+        while (!scanFinished) {
+            if (scan != top) {
+                scan = scan.getPrev();
+
+                scanCell(scan);
+            }
+            else
+                scanFinished = true;
+        }
+    }
+
     protected void flip() {
         Cell.flipGlobal();
 
@@ -209,8 +230,6 @@ public class Treadmill extends GarbageCollector {
     }
 
     protected void printTread() {
-        int counter = 0;
-
         Cell iterator = bottom;
         boolean cycleFinished = false;
 
@@ -236,12 +255,6 @@ public class Treadmill extends GarbageCollector {
             if (iterator == bottom) {
                 cycleFinished = true;
             }
-
-
-            if (counter == 100)
-                break;
-
-            counter++;
         }
 
         System.out.println();

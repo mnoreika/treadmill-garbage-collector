@@ -34,4 +34,7 @@ public class Integer extends EpiscopalObject {
         return MIN_SIZE;
     }
 
+    public int getValue() {
+        return value;
+    }
 }

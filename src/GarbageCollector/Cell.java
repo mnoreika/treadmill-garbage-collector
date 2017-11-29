@@ -39,4 +39,8 @@ public abstract class Cell {
         global = !global;
     }
 
+    public static void setGlobal() {
+        global = true;
+    }
+
 }
