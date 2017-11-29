@@ -1,5 +1,7 @@
 package GarbageCollector;
 
+import EpiscopalObjects.Indirection;
+import EpiscopalObjects.Integer;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,17 +15,32 @@ public class TreadmillTest {
 
     @Test
     public void intAllocation() {
-        Tag int1 = collector.allocate();
+        Cell int1 = collector.allocate(new Integer(2));
+        Cell int2 = collector.allocate(new Integer(4));
+        Cell ind = collector.allocate(new Indirection(int2));
 
-        assert(collector.free == int1);
-        assert(int1.getPointer() instanceof Data);
-        assert(int1.getPointer().getNext() == collector.free);
+        assert(collector.scan == int1);
+        assert(collector.scan.getNext() instanceof Data);
+        assert(collector.scan.getNext() == ((Tag) int1).getEntries().get(0));
+
+        collector.drop(int2);
+
+        collector.printTread();
+
+        collector.collection();
+//
+        collector.printTread();
+
+        collector.flip();
+
+        collector.printTread();
+
     }
 
-    @Test
-    public void doubleLink() {
-        Tag int1 = collector.allocate();
-
-        assert(int1.getNext().getPrev() == int1);
-    }
+//    @Test
+//    public void doubleLink() {
+//        Tag int1 = collector.allocate();
+//
+//        assert(int1.getNext().getPrev() == int1);
+//    }
 }

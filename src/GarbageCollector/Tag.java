@@ -10,6 +10,7 @@ public class Tag extends Cell {
         super();
 
         this.type = type;
+        entries = new ArrayList<Cell>();
     }
 
     public void addEntry(Cell cell) {
@@ -18,5 +19,10 @@ public class Tag extends Cell {
 
     public ArrayList<Cell> getEntries() {
         return entries;
+    }
+
+    @Override
+    public String toString() {
+        return "" + type;
     }
 }

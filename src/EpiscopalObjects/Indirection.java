@@ -33,4 +33,9 @@ public class Indirection extends  EpiscopalObject {
     public int getSize() {
         return MIN_SIZE;
     }
+
+    @Override
+    public String toString() {
+        return "Ind";
+    }
 }

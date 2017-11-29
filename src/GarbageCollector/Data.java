@@ -5,9 +5,16 @@ public class Data extends Cell {
 
     public Data(Object data) {
         super();
+
+        this.data = data;
     }
 
     public Object getData() {
         return data;
+    }
+
+    @Override
+    public String toString() {
+        return "<" + data + ">";
     }
 }

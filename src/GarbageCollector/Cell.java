@@ -1,7 +1,7 @@
 package GarbageCollector;
 
 public abstract class Cell {
-    private static boolean global = false;
+    private static boolean global = true;
 
     private Cell next;
     private Cell prev;

@@ -1,7 +1,6 @@
 package EpiscopalObjects;
 
 import GarbageCollector.*;
-
 import java.util.ArrayList;
 
 public class Distribution extends EpiscopalObject {
