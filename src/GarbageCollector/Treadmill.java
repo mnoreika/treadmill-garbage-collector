@@ -104,10 +104,14 @@ public class Treadmill extends GarbageCollector {
     @Override
     public void drop(Cell cell) {
         scope.remove(cell);
-        recollection();
+        collection();
     }
 
-    private void recollection() {
+    private void collection() {
+        for (Cell root : scope) {
+            moveCellToGrey(root);
+        }
+
         scan = scan.getPrev();
 
         while (scan != top) {
@@ -126,8 +130,6 @@ public class Treadmill extends GarbageCollector {
                     moveCellToGrey(children);
             }
         }
-
-        moveCellToBlack(cell);
     }
 
     private void moveCellToGrey(Cell cell) {
@@ -141,42 +143,17 @@ public class Treadmill extends GarbageCollector {
         top = cell;
     }
 
-    private void moveCellToBlack(Cell cell) {
-        takeCellOut(cell);
-
-        cell.setNext(scan);
-        cell.setPrev(scan.getPrev());
-        scan.getPrev().setNext(cell);
-        scan.setPrev(cell);
-        scan = cell;
-    }
-
     private void takeCellOut(Cell cell) {
-
+        cell.getPrev().setNext(cell.getNext());
+        cell.getNext().setPrev(cell.getPrev());
     }
 
     private void flip() {
-        Cell iterator = bottom;
+        Cell.flipGlobal();
 
-        /* Flip cell colours */
-        while (iterator != top) {
-            iterator.setColour(Colour.WHITE);
-            iterator = iterator.getNext();
-        }
-
-        iterator = scan;
-        while (iterator != free) {
-            iterator.setColour(Colour.ECRU);
-            iterator = iterator.getNext();
-        }
-
-        Cell temp = top;
-        top = bottom;
-        bottom = temp;
-
-        for (Cell root : scope) {
-            root.setColour(Colour.GREY);
-        }
+        bottom = top;
+        top = free;
+        scan = free;
     }
 
 }
