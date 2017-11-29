@@ -6,8 +6,11 @@ import java.util.ArrayList;
 
 public class Heap {
 
-    public ArrayList<Cell> allocateObject(EpiscopalObject object) {
+    public ArrayList<Cell> allocateCells(EpiscopalObject object) {
         return object.allocate();
     }
 
+    public ArrayList<Cell> reuseCells(EpiscopalObject object, ArrayList<Cell> cells) {
+        return object.allocate();
+    }
 }

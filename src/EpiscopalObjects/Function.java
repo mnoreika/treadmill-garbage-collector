@@ -31,4 +31,9 @@ public class Function extends EpiscopalObject {
 
         return blocks;
     }
+
+    @Override
+    public int getSize() {
+        return MIN_SIZE + numberOfParameters - 1;
+    }
 }

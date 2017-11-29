@@ -31,17 +31,17 @@ public class Distribution extends EpiscopalObject {
         blocks.add(numberOfElements);
 
         for (int i = 0; i < this.numberOfElements; i++) {
-            Tag indirection = new Tag(DataType.IND);
             Data element = new Data(new Indirection(elements[i]));
 
-            indirection.addEntry(element);
-
-            blocks.add(indirection);
             blocks.add(element);
-
-            tag.addEntry(indirection);
+            tag.addEntry(element);
         }
 
         return blocks;
+    }
+
+    @Override
+    public int getSize() {
+        return MIN_SIZE + numberOfElements - 1;
     }
 }

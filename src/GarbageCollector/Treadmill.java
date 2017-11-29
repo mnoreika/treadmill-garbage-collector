@@ -1,5 +1,7 @@
 package GarbageCollector;
 
+import EpiscopalObjects.EpiscopalObject;
+
 import java.util.ArrayList;
 
 public class Treadmill extends GarbageCollector {
@@ -21,82 +23,139 @@ public class Treadmill extends GarbageCollector {
     }
 
     @Override
-    public Tag allocate() {
-        Tag allocatedCell = null;
+    public Cell allocate(EpiscopalObject object) {
+        Cell allocatedTag = null;
 
+        // No drop cells available
         if (free == bottom) {
-//            flipCells();
+            ArrayList<Cell> cells = heap.allocateCells(object);
+            allocatedTag = cells.get(0);
 
-            Tag tag = null;
-            Data data = null;
+            linkCells(cells);
 
              /* First allocation */
             if (scan == null) {
-                scan = tag;
-                data.setNext(free);
-                data.setPrev(tag);
-                scan.setNext(data);
-                scan.setPrev(top);
+                scan = allocatedTag;
             }
             else {
-                tag.setNext(data);
-                tag.setPrev(scan.getPrev());
-                data.setNext(scan);
-                data.setPrev(tag);
-                scan.setPrev(data);
-                scan = tag;
+                allocatedTag.setNext(scan);
+                scan.setPrev(allocatedTag);
+                scan = allocatedTag;
             }
-
-            tag.setPointer(data);
-            allocatedCell = tag;
         } else {
-            allocatedCell = new Tag(DataType.INT);
-            free = free.getNext();
+            int objectCellSize = object.getSize();
+            int freeCount = 0;
+            ArrayList<Cell> freeCells = new ArrayList<Cell>();
+            boolean enoughFreeCells = false;
 
-            if (free == bottom) {
-                flipCells();
+            Cell iterator = free;
+            while (iterator != bottom && freeCount < objectCellSize) {
+                freeCells.add(free);
+                freeCount++;
+
+                if (freeCount == objectCellSize) {
+                    enoughFreeCells = true;
+
+                    // Remove used drop blocks
+                    free.getPrev().setNext(free.getNext());
+                }
+
+                free = free.getNext();
             }
+
+            ArrayList<Cell> cells = null;
+
+            if (enoughFreeCells) {
+                cells = heap.reuseCells(object, freeCells);
+            } else {
+                cells = heap.allocateCells(object);
+            }
+
+            linkCells(cells);
+
+            allocatedTag.setNext(scan);
+            scan.setPrev(allocatedTag);
+            scan = allocatedTag;
         }
 
-        scope.add(allocatedCell);
-        return allocatedCell;
+        scope.add(allocatedTag);
+        return allocatedTag;
+    }
+
+    private void linkCells(ArrayList<Cell> cells) {
+        for (int i = 0; i < cells.size(); i++) {
+            Cell current = cells.get(i);
+
+            if (i == 0) {
+                current.setPrev(null);
+                current.setNext(cells.get(i + 1));
+            }
+            else if (i == (cells.size() - 1)) {
+                current.setPrev(cells.get(i - 1));
+                current.setNext(null);
+            }
+            else {
+                current.setPrev(cells.get(i - 1));
+                current.setNext(cells.get(i + 1));
+            }
+        }
     }
 
     @Override
-    public void free(Cell cell) {
+    public void drop(Cell cell) {
         scope.remove(cell);
         recollection();
     }
 
     private void recollection() {
-        scan = scan.getNext();
+        scan = scan.getPrev();
 
         while (scan != top) {
             scanCell(scan);
 
-            scan = scan.getNext();
+            scan = scan.getPrev();
         }
+
+        flip();
     }
 
     private void scanCell(Cell cell) {
         if (cell instanceof Tag) {
-            Cell data = ((Tag) cell).getPointer();
-
-            if (data.getColour() == Colour.ECRU) {
-                moveCellToGrey(cell);
+            for (Cell children : ((Tag) cell).getEntries()) {
+                if (children.isEcru())
+                    moveCellToGrey(children);
             }
         }
+
+        moveCellToBlack(cell);
     }
 
     private void moveCellToGrey(Cell cell) {
-        cell.setColour(Colour.GREY);
+        takeCellOut(cell);
+        cell.setToNotEcru();
+
         cell.setNext(top);
         cell.setPrev(top.getPrev());
+        top.getPrev().setNext(cell);
         top.setPrev(cell);
         top = cell;
     }
 
-    private void flipCells() {
+    private void moveCellToBlack(Cell cell) {
+        takeCellOut(cell);
+
+        cell.setNext(scan);
+        cell.setPrev(scan.getPrev());
+        scan.getPrev().setNext(cell);
+        scan.setPrev(cell);
+        scan = cell;
+    }
+
+    private void takeCellOut(Cell cell) {
+
+    }
+
+    private void flip() {
         Cell iterator = bottom;
 
         /* Flip cell colours */

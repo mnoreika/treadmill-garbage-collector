@@ -1,5 +1,7 @@
 package GarbageCollector;
 
+import EpiscopalObjects.EpiscopalObject;
+
 public abstract class GarbageCollector {
     protected Heap heap;
 
@@ -7,7 +9,7 @@ public abstract class GarbageCollector {
         heap = new Heap();
     }
 
-    public abstract Tag allocate();
+    public abstract Cell allocate(EpiscopalObject object);
 
-    public abstract void free(Cell cell);
+    public abstract void drop(Cell cell);
 }

@@ -28,4 +28,9 @@ public class Indirection extends  EpiscopalObject {
 
         return blocks;
     }
+
+    @Override
+    public int getSize() {
+        return MIN_SIZE;
+    }
 }

@@ -3,12 +3,12 @@ package GarbageCollector;
 public abstract class Cell {
     private Cell next;
     private Cell prev;
-    private Colour colour;
+    private boolean ecru;
 
     public Cell() {
         this.next = null;
         this.prev = null;
-        this.colour = Colour.BLACK;
+        this.ecru = false;
     }
 
     public void setNext(Cell next) {
@@ -19,7 +19,7 @@ public abstract class Cell {
         this.prev = prev;
     }
 
-    public void setColour(Colour colour) { this.colour = colour; }
+    public void setToNotEcru() { this.ecru = true; }
 
     public Cell getNext() {
         return next;
@@ -29,7 +29,8 @@ public abstract class Cell {
         return prev;
     }
 
-    public Colour getColour() {
-        return colour;
+    public boolean isEcru() {
+        return ecru;
     }
+
 }

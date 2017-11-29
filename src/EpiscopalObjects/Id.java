@@ -29,4 +29,9 @@ public class Id extends EpiscopalObject {
 
         return blocks;
     }
+
+    @Override
+    public int getSize() {
+        return MIN_SIZE;
+    }
 }
