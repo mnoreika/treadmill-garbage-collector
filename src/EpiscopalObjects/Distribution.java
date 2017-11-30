@@ -40,6 +40,6 @@ public class Distribution extends EpiscopalObject {
 
     @Override
     public int getSize() {
-        return MIN_SIZE + numberOfElements - 1;
+        return MIN_SIZE + numberOfElements;
     }
 }

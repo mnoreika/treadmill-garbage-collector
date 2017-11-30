@@ -23,6 +23,61 @@ public class Treadmill extends GarbageCollector {
 
     @Override
     public Cell allocate(EpiscopalObject object) {
+//        if (free == bottom) {
+//            collectGarbage();
+//        }
+
+        System.out.println("p");
+        return initialize(object);
+    }
+
+    @Override
+    public void free(Cell cell) {
+        dropRoot(cell);
+    }
+
+    @Override
+    public void collectGarbage() {
+        if (free != null) {
+            System.out.println("yo");
+            scan();
+            flip();
+        }
+    }
+
+    public void printTread() {
+        Cell iterator = bottom;
+        boolean cycleFinished = false;
+
+        while (!cycleFinished) {
+            if (iterator == free) {
+                System.out.print("|F|");
+            }
+            if (iterator == bottom) {
+                System.out.print("|B|");
+            }
+
+            if (iterator == top) {
+                System.out.print("|T|");
+            }
+
+            if (iterator == scan) {
+                System.out.print("|S|");
+            }
+
+            System.out.print(iterator);
+            if (iterator != null)
+                iterator = iterator.getNext();
+
+            if (iterator == bottom) {
+                cycleFinished = true;
+            }
+        }
+
+        System.out.println();
+    }
+
+    protected Cell initialize(EpiscopalObject object) {
         Cell allocatedTag = null;
 
         // No free cells available
@@ -40,8 +95,8 @@ public class Treadmill extends GarbageCollector {
             else {
                 addNewCells(allocatedTag, lastCell);
             }
+
         } else {
-            ;
             /* Reallocating free cells */
             allocatedTag = reallocateFreeCells(object);
         }
@@ -50,11 +105,35 @@ public class Treadmill extends GarbageCollector {
         return allocatedTag;
     }
 
-    @Override
-    public void drop(Cell cell) {
+    protected void dropRoot(Cell cell) {
         scope.remove(cell);
     }
 
+    protected void scan() {
+        for (Cell root : scope) {
+            moveRoot(root);
+            printTread();
+        }
+
+        boolean scanFinished = false;
+        while (!scanFinished) {
+            if (scan != top) {
+                scan = scan.getPrev();
+
+                scanCell(scan);
+            }
+            else
+                scanFinished = true;
+        }
+    }
+
+    protected void flip() {
+        Cell.flipGlobal();
+
+        bottom = top;
+        top = free;
+        scan = free;
+    }
 
     private void setUpInitialCells(Cell allocatedTag, Cell lastCell) {
         scan = allocatedTag;
@@ -71,7 +150,7 @@ public class Treadmill extends GarbageCollector {
         ArrayList<Cell> cells = null;
 
         if (freeCells != null) {
-            // Remove used drop blocks
+            // Remove used dropRoot blocks
             for (Cell freeCell : freeCells) {
                 takeCellOut(freeCell);
             }
@@ -82,14 +161,23 @@ public class Treadmill extends GarbageCollector {
         }
 
         for (Cell cell : cells) {
-            moveCellToGrey(cell);
+            moveCellsToEcru(cell);
         }
 
         return cells.get(0);
     }
 
+    private void moveCellsToEcru(Cell cell) {
+        cell.setNext(bottom);
+        cell.setPrev(bottom.getPrev());
+        bottom.getPrev().setNext(cell);
+        bottom.setPrev(cell);
+        bottom = cell;
+    }
+
     private ArrayList<Cell> getFreeCells(EpiscopalObject object) {
         int objectCellSize = object.getSize();
+        System.out.println(objectCellSize);
         int freeCount = 0;
 
         ArrayList<Cell> freeCells = new ArrayList<Cell>();
@@ -97,10 +185,10 @@ public class Treadmill extends GarbageCollector {
 
         Cell iterator = free;
         while (iterator != bottom && freeCount < objectCellSize) {
-            freeCells.add(free);
+            freeCells.add(iterator);
             freeCount++;
 
-            free = free.getNext();
+            iterator = iterator.getNext();
             if (freeCount == objectCellSize) {
                 enoughFreeCells = true;
             }
@@ -203,61 +291,4 @@ public class Treadmill extends GarbageCollector {
         cell.getPrev().setNext(cell.getNext());
         cell.getNext().setPrev(cell.getPrev());
     }
-
-    protected void collection() {
-        for (Cell root : scope) {
-            moveRoot(root);
-        }
-
-        boolean scanFinished = false;
-        while (!scanFinished) {
-            if (scan != top) {
-                scan = scan.getPrev();
-
-                scanCell(scan);
-            }
-            else
-                scanFinished = true;
-        }
-    }
-
-    protected void flip() {
-        Cell.flipGlobal();
-
-        bottom = top;
-        top = free;
-        scan = free;
-    }
-
-    protected void printTread() {
-        Cell iterator = bottom;
-        boolean cycleFinished = false;
-
-        while (!cycleFinished) {
-            if (iterator == free) {
-                System.out.print("|F|");
-            }
-            if (iterator == bottom) {
-                System.out.print("|B|");
-            }
-
-            if (iterator == top) {
-                System.out.print("|T|");
-            }
-
-            if (iterator == scan) {
-                System.out.print("|S|");
-            }
-
-            System.out.print(iterator);
-            iterator = iterator.getNext();
-
-            if (iterator == bottom) {
-                cycleFinished = true;
-            }
-        }
-
-        System.out.println();
-    }
-
 }

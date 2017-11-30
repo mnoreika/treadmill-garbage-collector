@@ -11,5 +11,7 @@ public abstract class GarbageCollector {
 
     public abstract Cell allocate(EpiscopalObject object);
 
-    public abstract void drop(Cell cell);
+    public abstract void free(Cell cell);
+
+    public abstract void collectGarbage();
 }

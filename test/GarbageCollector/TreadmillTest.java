@@ -23,7 +23,7 @@ public class TreadmillTest {
     public void varAllocation() {
         System.out.println("--- varAllocation test ---");
 
-        Cell int1 = collector.allocate(new Integer(2));
+        Cell int1 = collector.initialize(new Integer(2));
 
         // Check if objects are linked together properly
         assertTrue(collector.scan == int1);
@@ -47,8 +47,8 @@ public class TreadmillTest {
     public void multVarAllocation() {
         System.out.println("--- multVarAllocation test ---");
 
-        Cell int1 = collector.allocate(new Integer(2));
-        Cell int2 = collector.allocate(new Integer(42));
+        Cell int1 = collector.initialize(new Integer(2));
+        Cell int2 = collector.initialize(new Integer(42));
 
         // Check if objects are linked together properly
         assertTrue(int1.getNext().getNext() == int2);
@@ -65,10 +65,10 @@ public class TreadmillTest {
     public void singleVarCollection() {
         System.out.println("--- singleVarCollection test ---");
 
-        Cell int1 = collector.allocate(new Integer(2));
+        Cell int1 = collector.initialize(new Integer(2));
 
         collector.printTread();
-        collector.collection();
+        collector.scan();
 
         assertTrue(collector.free == collector.bottom);
 
@@ -82,11 +82,11 @@ public class TreadmillTest {
     public void multiVarCollection() {
         System.out.println("--- multiVarCollection test ---");
 
-        Cell int1 = collector.allocate(new Integer(2));
-        Cell int2 = collector.allocate(new Integer(4));
+        Cell int1 = collector.initialize(new Integer(2));
+        Cell int2 = collector.initialize(new Integer(4));
 
         collector.printTread();
-        collector.collection();
+        collector.collectGarbage();
 
         assertTrue(collector.free == collector.bottom);
 
@@ -100,17 +100,19 @@ public class TreadmillTest {
     public void multiVarDropRefCollection() {
         System.out.println("--- multiVarDropCollection test ---");
 
-        Cell int1 = collector.allocate(new Integer(2));
-        Cell int2 = collector.allocate(new Integer(4));
+        Cell int1 = collector.initialize(new Integer(2));
+        Cell int2 = collector.initialize(new Integer(4));
 
-        collector.drop(int2);
+        collector.dropRoot(int2);
 
         collector.printTread();
-        collector.collection();
+        collector.scan();
 
         assertTrue(collector.bottom == int2);
 
         collector.flip();
+
+        collector.printTread();
 
         assertTrue(collector.free == int2);
         assertTrue(collector.free.getNext() == ((Tag) int2).getEntries().get(0));
@@ -122,14 +124,14 @@ public class TreadmillTest {
     public void dropVarPointerByIndirectionCollection() {
         System.out.println("--- dropVarPointerByIndirectionCollection test ---");
 
-        Cell int1 = collector.allocate(new Integer(2));
-        Cell int2 = collector.allocate(new Integer(4));
-        Cell ind = collector.allocate(new Indirection(int2));
+        Cell int1 = collector.initialize(new Integer(2));
+        Cell int2 = collector.initialize(new Integer(4));
+        Cell ind = collector.initialize(new Indirection(int2));
 
-        collector.drop(int2);
+        collector.dropRoot(int2);
 
         collector.printTread();
-        collector.collection();
+        collector.scan();
 
         assertTrue(collector.bottom == int2);
 
@@ -145,16 +147,16 @@ public class TreadmillTest {
     public void distAllocationAndCollection() {
         System.out.println("--- distAllocationAndCollection test ---");
 
-        Cell el1 = collector.allocate(new Integer(5));
-        Cell el2 = collector.allocate(new Integer(10));
+        Cell el1 = collector.initialize(new Integer(5));
+        Cell el2 = collector.initialize(new Integer(10));
 
         Cell[] elements = {el1, el2};
 
-        Cell customDist = collector.allocate(new Distribution(DistributionType.CUSTOM, 2, elements));
+        Cell customDist = collector.initialize(new Distribution(DistributionType.CUSTOM, 2, elements));
 
         collector.printTread();
 
-        collector.collection();
+        collector.scan();
 
         collector.printTread();
 
@@ -169,18 +171,18 @@ public class TreadmillTest {
     public void distCollection() {
         System.out.println("--- distCollection test ---");
 
-        Cell el1 = collector.allocate(new Integer(5));
-        Cell el2 = collector.allocate(new Integer(10));
+        Cell el1 = collector.initialize(new Integer(5));
+        Cell el2 = collector.initialize(new Integer(10));
 
         Cell[] elements = {el1, el2};
 
-        Cell customDist = collector.allocate(new Distribution(DistributionType.CUSTOM, 2, elements));
+        Cell customDist = collector.initialize(new Distribution(DistributionType.CUSTOM, 2, elements));
 
-        collector.drop(customDist);
+        collector.dropRoot(customDist);
 
         collector.printTread();
 
-        collector.collection();
+        collector.scan();
 
         collector.flip();
 
@@ -196,18 +198,18 @@ public class TreadmillTest {
     public void dropElementsInDist() {
         System.out.println("--- dropElementsInDist test ---");
 
-        Cell el1 = collector.allocate(new Integer(5));
-        Cell el2 = collector.allocate(new Integer(10));
+        Cell el1 = collector.initialize(new Integer(5));
+        Cell el2 = collector.initialize(new Integer(10));
 
         Cell[] elements = {el2, el1};
 
-        Cell customDist = collector.allocate(new Distribution(DistributionType.CUSTOM, 2, elements));
+        Cell customDist = collector.initialize(new Distribution(DistributionType.CUSTOM, 2, elements));
 
-        collector.drop(el2);
+        collector.dropRoot(el2);
 
         collector.printTread();
 
-        collector.collection();
+        collector.scan();
 
         collector.printTread();
 
@@ -225,16 +227,16 @@ public class TreadmillTest {
     public void nestedPointers() {
         System.out.println("--- dropElementsInDist test ---");
 
-        Cell int1 = collector.allocate(new Integer(2));
-        Cell ind1 = collector.allocate(new Indirection(int1));
-        Cell ind2 = collector.allocate(new Indirection(ind1));
+        Cell int1 = collector.initialize(new Integer(2));
+        Cell ind1 = collector.initialize(new Indirection(int1));
+        Cell ind2 = collector.initialize(new Indirection(ind1));
 
-        collector.drop(int1);
-        collector.drop(ind1);
+        collector.dropRoot(int1);
+        collector.dropRoot(ind1);
 
         collector.printTread();
 
-        collector.collection();
+        collector.scan();
 
         collector.printTread();
 
@@ -252,20 +254,20 @@ public class TreadmillTest {
     public void dropAndCollectPDistribution() {
         System.out.println("--- dropAndCollectPDistribution test ---");
 
-        Cell int1 = collector.allocate(new Integer(2));
-        Cell int2 = collector.allocate(new Integer(10));
-        Cell int3 = collector.allocate(new Integer(42));
-        Cell int4 = collector.allocate(new Integer(124));
-        Cell int5 = collector.allocate(new Integer(50));
-        Cell int6 = collector.allocate(new Integer(77));
+        Cell int1 = collector.initialize(new Integer(2));
+        Cell int2 = collector.initialize(new Integer(10));
+        Cell int3 = collector.initialize(new Integer(42));
+        Cell int4 = collector.initialize(new Integer(124));
+        Cell int5 = collector.initialize(new Integer(50));
+        Cell int6 = collector.initialize(new Integer(77));
 
-        Cell pdist = collector.allocate(new PDistribution(DistributionType.CUSTOM,
+        Cell pdist = collector.initialize(new PDistribution(DistributionType.CUSTOM,
                 3, 3, new Cell[] { int1, int2, int3 }, new Cell[] {int4, int5, int6}));
 
-        collector.drop(pdist);
+        collector.dropRoot(pdist);
 
         collector.printTread();
-        collector.collection();
+        collector.scan();
 
         collector.flip();
 
@@ -281,13 +283,13 @@ public class TreadmillTest {
     public void dropRefAndAllocateFromFree() {
         System.out.println("--- dropRefAndAllocateFromFree test ---");
 
-        Cell int1 = collector.allocate(new Integer(2));
-        Cell int2 = collector.allocate(new Integer(10));
+        Cell int1 = collector.initialize(new Integer(2));
+        Cell int2 = collector.initialize(new Integer(10));
 
-        collector.drop(int2);
+        collector.dropRoot(int2);
 
         collector.printTread();
-        collector.collection();
+        collector.scan();
 
         collector.flip();
 
@@ -295,7 +297,7 @@ public class TreadmillTest {
 
         collector.printTread();
 
-        Cell newInt2 = collector.allocate(new Integer(12));
+        Cell newInt2 = collector.initialize(new Integer(12));
 
         collector.printTread();
 
@@ -308,23 +310,23 @@ public class TreadmillTest {
     public void variedHeap() {
         System.out.println("--- variedHeap test ---");
 
-        Cell int1 = collector.allocate(new Integer(2));
-        Cell int2 = collector.allocate(new Integer(10));
-        Cell int3 = collector.allocate(new Integer(42));
-        Cell int4 = collector.allocate(new Integer(124));
-        Cell int5 = collector.allocate(new Integer(50));
-        Cell int6 = collector.allocate(new Integer(77));
+        Cell int1 = collector.initialize(new Integer(2));
+        Cell int2 = collector.initialize(new Integer(10));
+        Cell int3 = collector.initialize(new Integer(42));
+        Cell int4 = collector.initialize(new Integer(124));
+        Cell int5 = collector.initialize(new Integer(50));
+        Cell int6 = collector.initialize(new Integer(77));
 
-        Cell dist1 = collector.allocate(new Distribution(DistributionType.BETA, 2, new Cell[]{int1, int6}));
-        Cell dist2 = collector.allocate(new Distribution(DistributionType.CUSTOM, 4, new Cell[]{int1, int2, int3, int4}));
-        Cell indi1 = collector.allocate(new Indirection(int5));
+        Cell dist1 = collector.initialize(new Distribution(DistributionType.BETA, 2, new Cell[]{int1, int6}));
+        Cell dist2 = collector.initialize(new Distribution(DistributionType.CUSTOM, 4, new Cell[]{int1, int2, int3, int4}));
+        Cell indi1 = collector.initialize(new Indirection(int5));
 
-        collector.drop(dist2);
-        collector.drop(int1);
+        collector.dropRoot(dist2);
+        collector.dropRoot(int1);
 
         collector.printTread();
 
-        collector.collection();
+        collector.scan();
 
         collector.flip();
 
